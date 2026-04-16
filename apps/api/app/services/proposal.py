@@ -6,8 +6,7 @@ from app.models.schemas import GenerateProposalResponse, NormalizedJob, UserProf
 class ProposalService:
     def generate(self, job: NormalizedJob, profile: UserProfile) -> GenerateProposalResponse:
         intro = (
-            profile.short_intro
-            or "I build practical MVPs and production-ready automation systems."
+            profile.short_intro or "I build practical MVPs and production-ready automation systems."
         )
         skill_line = (
             ", ".join(profile.skills[:5])

@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from app.models.schemas import NormalizedJob, UserProfile
 from app.services.scoring import ScoringService
@@ -18,7 +18,7 @@ def test_scoring_prefers_keyword_and_category_matches() -> None:
         category="Web Development",
         budget_max=50000,
         description="Need backend automation work",
-        posted_at=datetime.now(UTC),
+        posted_at=datetime.now(timezone.utc),
     )
 
     result = ScoringService().analyze_jobs([job], profile)[0]

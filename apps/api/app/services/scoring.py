@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 from app.models.schemas import JobAnalysis, JobScoreBreakdown, NormalizedJob, UserProfile
 from app.services.llm import LLMClient
@@ -39,9 +39,7 @@ class ScoringService:
             red_flags.append("Budget may be below your preferred minimum rate.")
 
         keyword_hits = sum(
-            1
-            for keyword in profile.keywords_prioritize
-            if keyword.lower() in title_desc
+            1 for keyword in profile.keywords_prioritize if keyword.lower() in title_desc
         )
         breakdown.keywords = min(keyword_hits * 8, 24)
         if keyword_hits:
@@ -54,7 +52,7 @@ class ScoringService:
             red_flags.append(f"Found {avoid_hits} avoid-keyword match(es).")
 
         if job.posted_at:
-            age_hours = (datetime.now(UTC) - job.posted_at).total_seconds() / 3600
+            age_hours = (datetime.now(timezone.utc) - job.posted_at).total_seconds() / 3600
             if age_hours <= 24:
                 breakdown.recency = 8
                 reasons.append("Recently posted opportunity.")
