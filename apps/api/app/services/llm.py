@@ -14,8 +14,7 @@ class FitSummary:
 
 
 class LLMProvider(Protocol):
-    def summarize_fit(self, *, title: str, description: str) -> FitSummary:
-        ...
+    def summarize_fit(self, *, title: str, description: str) -> FitSummary: ...
 
 
 class MockLLMProvider:

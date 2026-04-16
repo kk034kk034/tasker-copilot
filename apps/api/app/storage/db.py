@@ -59,19 +59,13 @@ def save_proposal_draft(item: ProposalDraftRecord) -> None:
 
 def list_recent_opportunities(limit: int = 20) -> list[OpportunityRecord]:
     with get_session() as session:
-        stmt = (
-            select(OpportunityRecord)
-            .order_by(OpportunityRecord.created_at.desc())
-            .limit(limit)
-        )
+        stmt = select(OpportunityRecord).order_by(OpportunityRecord.created_at.desc()).limit(limit)
         return list(session.exec(stmt))
 
 
 def list_recent_proposals(limit: int = 20) -> list[ProposalDraftRecord]:
     with get_session() as session:
         stmt = (
-            select(ProposalDraftRecord)
-            .order_by(ProposalDraftRecord.created_at.desc())
-            .limit(limit)
+            select(ProposalDraftRecord).order_by(ProposalDraftRecord.created_at.desc()).limit(limit)
         )
         return list(session.exec(stmt))
