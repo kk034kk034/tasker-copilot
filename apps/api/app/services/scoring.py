@@ -3,12 +3,12 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from app.models.schemas import JobAnalysis, JobScoreBreakdown, NormalizedJob, UserProfile
-from app.services.llm import LLMClient
+from app.services.llm import LLMProvider, get_llm_provider
 
 
 class ScoringService:
-    def __init__(self) -> None:
-        self.llm = LLMClient()
+    def __init__(self, llm_provider: LLMProvider | None = None) -> None:
+        self.llm = llm_provider or get_llm_provider()
 
     def analyze_jobs(self, jobs: list[NormalizedJob], profile: UserProfile) -> list[JobAnalysis]:
         analyzed = [self._analyze_job(job, profile) for job in jobs]
@@ -57,7 +57,7 @@ class ScoringService:
                 breakdown.recency = 8
                 reasons.append("Recently posted opportunity.")
 
-        llm_fit_summary, llm_confidence, proposal_angle = self.llm.summarize_fit(
+        llm_fit = self.llm.summarize_fit(
             title=job.title,
             description=job.description,
         )
@@ -81,7 +81,7 @@ class ScoringService:
             breakdown=breakdown,
             reasons=reasons,
             red_flags=red_flags,
-            llm_fit_summary=llm_fit_summary,
-            llm_confidence=llm_confidence,
-            proposal_angle=proposal_angle,
+            llm_fit_summary=llm_fit.summary,
+            llm_confidence=llm_fit.confidence,
+            proposal_angle=llm_fit.proposal_angle,
         )

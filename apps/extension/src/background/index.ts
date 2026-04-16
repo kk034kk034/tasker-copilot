@@ -1,12 +1,9 @@
 import type {
   AnalyzeJobsRequest,
-  AnalyzeJobsResponse,
   GenerateProposalRequest,
-  GenerateProposalResponse,
   NormalizedJob
 } from "@tasker-copilot/shared";
-
-const API_BASE = "http://127.0.0.1:8000";
+import { apiClient } from "../shared/apiClient";
 
 async function activeTabId(): Promise<number> {
   const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -21,26 +18,17 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message?.type === "ANALYZE_JOBS") {
       const tabId = await activeTabId();
       const extracted = await chrome.tabs.sendMessage(tabId, { type: "TASKER_EXTRACT_JOBS" });
-      const payload: AnalyzeJobsRequest = { jobs: extracted.jobs as NormalizedJob[] };
-      const res = await fetch(`${API_BASE}/v1/jobs/analyze`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      const json = (await res.json()) as AnalyzeJobsResponse;
-      sendResponse(json);
+      const jobs = (extracted.jobs ?? []) as NormalizedJob[];
+      const payload: AnalyzeJobsRequest = { jobs };
+      const result = await apiClient.scoreJobs(payload);
+      sendResponse({ ...result, jobs });
       return;
     }
 
     if (message?.type === "GENERATE_PROPOSAL") {
       const payload: GenerateProposalRequest = { job: message.job as NormalizedJob };
-      const res = await fetch(`${API_BASE}/v1/proposals/generate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      const json = (await res.json()) as GenerateProposalResponse;
-      sendResponse(json);
+      const result = await apiClient.generateProposal(payload);
+      sendResponse(result);
       return;
     }
 
@@ -51,8 +39,12 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         proposal: message.proposal
       });
       sendResponse(result);
+      return;
     }
+
+    sendResponse({ error: "Unknown message type." });
   })().catch((error) => {
+    console.error("[tasker-copilot/background]", error);
     sendResponse({ error: String(error) });
   });
 

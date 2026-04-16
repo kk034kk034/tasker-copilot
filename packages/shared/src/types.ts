@@ -26,6 +26,14 @@ export type NormalizedJob = {
   raw_text: string;
 };
 
+export type JobScoreBreakdown = {
+  category: number;
+  budget: number;
+  keywords: number;
+  blacklist_penalty: number;
+  recency: number;
+};
+
 export type AnalyzeJobsRequest = {
   jobs: NormalizedJob[];
   profile?: UserProfile;
@@ -34,8 +42,11 @@ export type AnalyzeJobsRequest = {
 export type JobAnalysis = {
   job_id: string;
   total_score: number;
+  breakdown: JobScoreBreakdown;
   reasons: string[];
   red_flags: string[];
+  llm_fit_summary?: string | null;
+  llm_confidence?: number | null;
   proposal_angle?: string | null;
 };
 
