@@ -1,45 +1,42 @@
 # Tasker Proposal Copilot (MVP)
 
-Open-source AI copilot for **Tasker (Taiwan freelance marketplace)** proposal workflows.
+Open-source AI copilot for **Tasker (Taiwan freelance marketplace)** proposals.
 
-## Why this exists
-Freelancers lose time repeatedly scanning listings and rewriting similar proposals. This project focuses on one vertical workflow:
-1. Analyze job listings quickly
-2. Rank fit with transparent reasons
-3. Generate tailored proposal drafts
-4. Fill proposal forms safely (manual final submit)
+## MVP at a glance
+This repo intentionally ships a narrow vertical slice:
+1. Parse visible Tasker job cards.
+2. Score jobs via local backend.
+3. Show top recommendations in extension popup.
+4. Generate one editable proposal draft.
+5. Fill proposal textarea(s) only (never submit automatically).
 
-## MVP Features
-- Chrome Extension (MV3) on Tasker pages
-- Parse Tasker listing cards and job detail content
-- Local FastAPI backend scoring and proposal APIs
-- Explainable scoring (rules + optional LLM notes)
-- Editable proposal generation
-- Fill-form helper that **stops before final submission**
+## Clear boundaries
+### Included
+- Tasker-focused Chrome extension (MV3).
+- FastAPI backend with SQLite persistence.
+- Explainable scoring + optional LLM fit summary.
+- Mock LLM provider for local development.
 
-## Architecture diagram
-```mermaid
-flowchart LR
-  U[User on Tasker page] --> E[Chrome Extension]
-  E --> A[FastAPI Local API]
-  A --> D[(SQLite)]
-  A --> L[LLM Provider Interface]
-```
+### Explicitly excluded
+- Auto submit flows.
+- CAPTCHA bypass / anti-bot evasion.
+- Stealth scraping.
+- Hardcoded credentials.
+- Multi-platform support in v1.
 
-## Repo layout
-- `apps/extension` - TypeScript Chrome extension
-- `apps/api` - FastAPI backend + SQLite
-- `packages/shared` - shared TS contracts
-- `docs/` - design notes and guides
-- `scripts/` - helper scripts
-- `.github/workflows/` - CI
+## Repository structure
+- `apps/api` — FastAPI backend (profile, scoring, proposal generation, SQLite)
+- `apps/extension` — Chrome extension (popup/content/background/Tasker adapter)
+- `packages/shared` — shared TypeScript contracts
+- `docs` — supporting notes and walkthroughs
 
-## Local setup
+## Local setup (fresh machine)
+
 ### Prerequisites
-- Node.js 20+
 - Python 3.11+
+- Node.js 20+
 
-### 1) Backend
+### 1) Start backend
 ```bash
 cd apps/api
 python -m venv .venv
@@ -49,43 +46,60 @@ cp ../../.env.example .env
 uvicorn app.main:app --reload --port 8000
 ```
 
-### 2) Shared package
+Health check:
+```bash
+curl http://127.0.0.1:8000/health
+```
+
+### 2) Build shared package
 ```bash
 cd packages/shared
 npm install
 npm run build
 ```
 
-### 3) Extension
+### 3) Build extension
 ```bash
 cd apps/extension
 npm install
 npm run build
 ```
 
-## Environment variables
-Copy `.env.example` and update as needed.
-
-Key variables:
-- `API_HOST` (default `127.0.0.1`)
-- `API_PORT` (default `8000`)
-- `OPENAI_API_KEY` (optional)
-- `OPENAI_BASE_URL` (optional, OpenAI-compatible)
-- `OPENAI_MODEL` (default `gpt-4o-mini`)
-- `ENABLE_LLM` (`true`/`false`)
-
-## Load extension in Chrome
+### 4) Load unpacked extension
 1. Open `chrome://extensions`
 2. Enable **Developer mode**
 3. Click **Load unpacked**
 4. Select `apps/extension/dist`
-5. Open Tasker cases page and use popup actions
+5. Visit Tasker cases page, open popup, click **Analyze jobs**
 
-## Safety and limitations
-- This project does **not** auto-submit proposals.
-- User must manually review and click final submit.
-- No anti-bot/CAPTCHA bypass features are included.
-- You are responsible for complying with Tasker terms and local laws.
+> Note: the manifest uses source paths (`src/...js`) emitted by TypeScript build within the project folder.
+
+## API endpoints (MVP)
+- `GET /health`
+- `GET /profiles/current`
+- `PUT /profiles/current`
+- `POST /jobs/score`
+- `POST /proposals/generate`
+
+Legacy compatibility routes exist under `/v1`.
+
+## Environment variables
+Copy `.env.example` to `.env`.
+
+- `API_HOST=127.0.0.1`
+- `API_PORT=8000`
+- `DATABASE_URL=sqlite:///apps/api/data/tasker_copilot.db`
+- `ENABLE_LLM=false`
+- `LLM_PROVIDER=mock`
+- `OPENAI_API_KEY=`
+- `OPENAI_BASE_URL=https://api.openai.com/v1`
+- `OPENAI_MODEL=gpt-4o-mini`
+
+## Tasker-specific assumptions
+- Primary target pages: `https://www.tasker.com.tw/case*`
+- Selector strategy is centralized in `taskerAdapter.ts`
+- MVP parses only visible job cards from the current page
+- DOM changes on Tasker may require adapter selector updates
 
 ## Development commands
 ```bash
@@ -99,29 +113,20 @@ pytest
 cd apps/extension
 npm run lint
 npm run typecheck
+npm test
 
 # Shared
 cd packages/shared
 npm test
 ```
 
-## CI
-GitHub Actions runs lint + tests for API, extension, and shared packages on push/PR.
+## Safety
+- This tool never auto-submits proposals.
+- User always performs final review and submit action.
+- Generated text is assistive and may be wrong; verify before use.
 
-## Roadmap
-- Better ranking via embeddings
-- Configurable profile presets
-- Improved Tasker selector resilience
-- Enhanced UI + result explanation views
-- Multi-platform adapters (post-v1)
-
-## Screenshots
-> Placeholder: add screenshots/gifs of Analyze → Generate → Fill flow.
-
-## Contribution guide
-- Start with [CONTRIBUTING.md](./CONTRIBUTING.md).
-- Reference [PRODUCT_SPEC.md](./PRODUCT_SPEC.md), [ARCHITECTURE.md](./ARCHITECTURE.md), and [AGENTS.md](./AGENTS.md).
-- Security reports: [SECURITY.md](./SECURITY.md).
-
-## License
-MIT
+## Documentation
+- [PRODUCT_SPEC.md](./PRODUCT_SPEC.md)
+- [ARCHITECTURE.md](./ARCHITECTURE.md)
+- [AGENTS.md](./AGENTS.md)
+- [SECURITY.md](./SECURITY.md)

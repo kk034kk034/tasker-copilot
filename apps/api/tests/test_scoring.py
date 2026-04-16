@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from app.models.schemas import NormalizedJob, UserProfile
 from app.services.scoring import ScoringService
@@ -26,3 +26,29 @@ def test_scoring_prefers_keyword_and_category_matches() -> None:
     assert result.total_score >= 70
     assert result.breakdown.category > 0
     assert result.breakdown.keywords > 0
+
+
+def test_scoring_penalizes_avoid_keywords_and_old_jobs() -> None:
+    profile = UserProfile(
+        preferred_categories=["Web Development"],
+        excluded_categories=["Design"],
+        keywords_prioritize=["python"],
+        keywords_avoid=["wordpress", "urgent"],
+        rate_min=30000,
+    )
+    job = NormalizedJob(
+        job_id="2",
+        title="Urgent WordPress maintenance",
+        url="https://example.com/job/2",
+        category="Design",
+        budget_max=10000,
+        description="Need urgent wordpress fixes",
+        posted_at=datetime.now(timezone.utc) - timedelta(days=3),
+    )
+
+    result = ScoringService().analyze_jobs([job], profile)[0]
+
+    assert result.total_score <= 20
+    assert result.breakdown.blacklist_penalty < 0
+    assert result.breakdown.recency == 0
+    assert result.red_flags
