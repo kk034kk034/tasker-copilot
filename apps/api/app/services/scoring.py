@@ -30,14 +30,19 @@ class ScoringService:
             breakdown.blacklist_penalty -= 30
             red_flags.append("Category appears in excluded categories.")
 
-        if job.budget_max is not None and profile.rate_min is not None and job.budget_max >= profile.rate_min:
+        has_budget_and_rate = job.budget_max is not None and profile.rate_min is not None
+        if has_budget_and_rate and job.budget_max >= profile.rate_min:
             breakdown.budget = 20
             reasons.append("Budget range can satisfy minimum rate target.")
-        elif job.budget_max is not None and profile.rate_min is not None:
+        elif has_budget_and_rate:
             breakdown.budget = -10
             red_flags.append("Budget may be below your preferred minimum rate.")
 
-        keyword_hits = sum(1 for keyword in profile.keywords_prioritize if keyword.lower() in title_desc)
+        keyword_hits = sum(
+            1
+            for keyword in profile.keywords_prioritize
+            if keyword.lower() in title_desc
+        )
         breakdown.keywords = min(keyword_hits * 8, 24)
         if keyword_hits:
             reasons.append(f"Matched {keyword_hits} prioritized keyword(s).")

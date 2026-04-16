@@ -11,7 +11,11 @@ class LLMClient:
 
     def summarize_fit(self, *, title: str, description: str) -> tuple[str, float, str]:
         if not self.is_enabled():
-            return ("LLM disabled; using rule-based scoring only.", 0.35, "Highlight direct skill alignment.")
+            return (
+                "LLM disabled; using rule-based scoring only.",
+                0.35,
+                "Highlight direct skill alignment.",
+            )
 
         # MVP: deterministic placeholder until provider call is wired.
         # Keep this explicit for easier local development and predictable tests.

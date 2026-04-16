@@ -23,6 +23,9 @@ dev = [
   "black>=24.8.0"
 ]
 
+[tool.setuptools.packages.find]
+include = ["app*"]
+
 [tool.black]
 line-length = 100
 
