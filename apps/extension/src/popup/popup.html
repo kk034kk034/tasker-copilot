@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Tasker Copilot</title>
+    <style>
+      body { font-family: Arial, sans-serif; width: 340px; margin: 12px; }
+      button { margin-right: 8px; margin-bottom: 8px; }
+      textarea { width: 100%; min-height: 160px; }
+      #status { margin: 8px 0; color: #333; }
+      #result { font-size: 12px; margin-bottom: 8px; }
+    </style>
+  </head>
+  <body>
+    <h3>Tasker Proposal Copilot</h3>
+    <button id="analyze">Analyze jobs</button>
+    <button id="generate">Generate proposal</button>
+    <button id="fill">Fill proposal</button>
+    <div id="status">Ready.</div>
+    <div id="result"></div>
+    <textarea id="proposal" placeholder="Generated proposal appears here..."></textarea>
+    <p><strong>Safety:</strong> This extension never auto-submits. Always review before final submit.</p>
+    <script type="module" src="./src/popup/index.js"></script>
+  </body>
+</html>
