@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Tasker Proposal Copilot",
+  "version": "0.1.0",
+  "description": "Analyze Tasker jobs, generate proposals, and fill forms safely.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["http://127.0.0.1:8000/*", "https://www.tasker.com.tw/*"],
+  "background": {
+    "service_worker": "src/background/index.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.tasker.com.tw/case*", "https://www.tasker.com.tw/*"],
+      "js": ["src/content/index.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
