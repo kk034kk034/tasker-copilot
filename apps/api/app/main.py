@@ -26,7 +26,10 @@ async def api_key_guard(request: Request, call_next):
     if request.method == "OPTIONS":
         return await call_next(request)
 
-    if request.url.path in settings.exempt_paths_from_api_key or request.url.path == "/auth/anonymous":
+    if (
+        request.url.path in settings.exempt_paths_from_api_key
+        or request.url.path == "/auth/anonymous"
+    ):
         return await call_next(request)
 
     header_api_key = request.headers.get("X-API-Key", "").strip()
