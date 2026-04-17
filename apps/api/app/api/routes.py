@@ -10,6 +10,8 @@ from app.models.schemas import (
     GenerateProposalResponse,
     UserProfile,
 )
+from app.core.auth import anonymous_token_store
+from app.core.config import settings
 from app.services.proposal import ProposalService
 from app.services.scoring import ScoringService
 from app.storage.db import (
@@ -93,6 +95,12 @@ def post_jobs_score(payload: AnalyzeJobsRequest) -> AnalyzeJobsResponse:
 @router.post("/proposals/generate", response_model=GenerateProposalResponse)
 def post_generate_proposal(payload: GenerateProposalRequest) -> GenerateProposalResponse:
     return generate_proposal(payload)
+
+
+@router.post("/auth/anonymous")
+def post_auth_anonymous() -> dict[str, int | str]:
+    token, expires_in = anonymous_token_store.issue(settings.anonymous_token_ttl_seconds)
+    return {"token": token, "token_type": "Bearer", "expires_in": expires_in}
 
 
 @legacy_router.get("/profile", response_model=UserProfile)

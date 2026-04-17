@@ -147,3 +147,6 @@ __pycache__/
 
 # Extension build
 apps/extension/dist/
+
+# Extension keys
+extension.pem

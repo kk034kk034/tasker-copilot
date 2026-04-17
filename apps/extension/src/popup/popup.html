@@ -10,10 +10,16 @@
       #status { margin: 8px 0; color: #333; }
       #result { font-size: 12px; margin-bottom: 8px; max-height: 220px; overflow: auto; }
       .ranked-row { margin-bottom: 8px; }
+      .controls { margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+      .controls input { width: 56px; }
     </style>
   </head>
   <body>
     <h3>Tasker Proposal Copilot</h3>
+    <div class="controls">
+      <label for="maxPages">Pages</label>
+      <input id="maxPages" type="number" min="1" max="10" value="3" />
+    </div>
     <button id="analyze">Analyze jobs</button>
     <button id="generate">Generate proposal</button>
     <button id="fill">Fill proposal</button>
@@ -21,6 +27,6 @@
     <div id="result"></div>
     <textarea id="proposal" placeholder="Generated proposal appears here..."></textarea>
     <p><strong>Safety:</strong> This extension never auto-submits. Always review before final submit.</p>
-    <script type="module" src="./src/popup/index.js"></script>
+    <script type="module" src="./popup/index.js"></script>
   </body>
 </html>

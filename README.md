@@ -136,6 +136,7 @@ npm test
 - Extension runtime API config is stored in `chrome.storage.local` keys:
   - `apiBaseUrl`
   - `apiKey`
+- If `apiKey` is empty, extension automatically requests short-lived anonymous bearer tokens from `/auth/anonymous`.
 - Default production API URL is `https://api.your-domain.com`.
 - Update `apps/extension/manifest.json` with your real API domain in `host_permissions` before store submission.
 - For NAS deployment, use:

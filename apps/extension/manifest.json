@@ -1,16 +1,19 @@
 {
   "manifest_version": 3,
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxkcnNaWciYJQfqoreK2qYXwf47qA5zJDiq8DTqOkUw0k5VImL3/EdMW9LwD/NT7YoQxji5nQ10P8VM6m3/etv+pKv12wohkr99PADRjyMbSiDVtxn58VCxEIcLNbQKj2sCVFSQtWLGlBQPnHjuwvxQatVxoOjk9WwbwUFr3lv39y+RhzupENEWj9gP6IV6mxkm5iOnCoYgnKJMBtjWjBVeTT0FKWKiVAGqHUxVWFlYosy2mH6+Zyzpj4fG5ihCku6DJGc3dUwOI44yJN9l9wfARHyvD8isJBLR8OeZYIuP47qufpDfnxIBPjgdxj7GcqXnNJinAL8fq8PJHwt3NUpwIDAQAB",
   "name": "Tasker Proposal Copilot",
   "version": "0.1.0",
+  "version_name": "dev",
   "description": "Analyze Tasker jobs, generate proposals, and fill forms safely.",
   "permissions": ["activeTab", "scripting", "storage"],
   "host_permissions": [
     "http://127.0.0.1:8000/*",
     "https://tasker-copilot.easy-wh.com/*",
+    "https://tasker.com.tw/*",
     "https://www.tasker.com.tw/*"
   ],
   "background": {
-    "service_worker": "src/background/index.js",
+    "service_worker": "background/index.js",
     "type": "module"
   },
   "action": {
@@ -18,8 +21,11 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://www.tasker.com.tw/case*", "https://www.tasker.com.tw/*"],
-      "js": ["src/content/index.js"],
+      "matches": [
+        "https://tasker.com.tw/*",
+        "https://www.tasker.com.tw/*"
+      ],
+      "js": ["content/index.js"],
       "run_at": "document_idle"
     }
   ]

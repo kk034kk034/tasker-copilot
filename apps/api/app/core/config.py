@@ -22,6 +22,8 @@ class Settings:
         if item.strip()
     )
     api_key: str = os.getenv("API_KEY", "")
+    enable_anonymous_token_auth: bool = os.getenv("ENABLE_ANONYMOUS_TOKEN_AUTH", "true").lower() == "true"
+    anonymous_token_ttl_seconds: int = int(os.getenv("ANONYMOUS_TOKEN_TTL_SECONDS", "3600"))
     exempt_paths_from_api_key: tuple[str, ...] = ("/health", "/docs", "/openapi.json", "/redoc")
     enable_llm: bool = os.getenv("ENABLE_LLM", "false").lower() == "true"
     llm_provider: str = os.getenv("LLM_PROVIDER", "mock")

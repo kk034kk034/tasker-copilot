@@ -2,12 +2,14 @@ import type { AnalyzeJobsResponse, GenerateProposalResponse, NormalizedJob } fro
 
 type AnalyzeJobsMessageResponse = AnalyzeJobsResponse & {
   jobs?: NormalizedJob[];
+  scannedPages?: number;
   error?: string;
 };
 
 const statusEl = document.getElementById("status") as HTMLDivElement;
 const resultEl = document.getElementById("result") as HTMLDivElement;
 const proposalEl = document.getElementById("proposal") as HTMLTextAreaElement;
+const maxPagesEl = document.getElementById("maxPages") as HTMLInputElement;
 
 let selectedJob: NormalizedJob | null = null;
 let jobMap: Record<string, NormalizedJob> = {};
@@ -44,9 +46,13 @@ function renderRankedResults(response: AnalyzeJobsMessageResponse): void {
 }
 
 (document.getElementById("analyze") as HTMLButtonElement).addEventListener("click", async () => {
-  setStatus("Analyzing visible Tasker jobs...");
+  const maxPages = Math.max(1, Math.min(Number(maxPagesEl.value) || 1, 10));
+  setStatus(`Analyzing Tasker jobs across up to ${maxPages} page(s)...`);
 
-  const response = (await chrome.runtime.sendMessage({ type: "ANALYZE_JOBS" })) as AnalyzeJobsMessageResponse;
+  const response = (await chrome.runtime.sendMessage({
+    type: "ANALYZE_JOBS",
+    maxPages
+  })) as AnalyzeJobsMessageResponse;
 
   if (response.error) {
     setStatus(`Error: ${response.error}`);
@@ -57,7 +63,8 @@ function renderRankedResults(response: AnalyzeJobsMessageResponse): void {
   jobMap = Object.fromEntries(extractedJobs.map((job) => [job.job_id, job]));
 
   if (!response.ranked?.length) {
-    setStatus("No jobs found on this page.");
+    const scannedPages = response.scannedPages ?? 1;
+    setStatus(`No jobs found from ${scannedPages} scanned page(s).`);
     resultEl.innerHTML = "";
     return;
   }
@@ -65,7 +72,8 @@ function renderRankedResults(response: AnalyzeJobsMessageResponse): void {
   const topJobId = response.ranked[0].job_id;
   selectedJob = jobMap[topJobId] ?? null;
   renderRankedResults(response);
-  setStatus("Analyze complete. Top recommendations shown below.");
+  const scannedPages = response.scannedPages ?? 1;
+  setStatus(`Analyze complete. Scanned ${scannedPages} page(s), found ${extractedJobs.length} job(s).`);
 });
 
 (document.getElementById("generate") as HTMLButtonElement).addEventListener("click", async () => {
