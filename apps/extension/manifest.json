@@ -4,7 +4,11 @@
   "version": "0.1.0",
   "description": "Analyze Tasker jobs, generate proposals, and fill forms safely.",
   "permissions": ["activeTab", "scripting", "storage"],
-  "host_permissions": ["http://127.0.0.1:8000/*", "https://www.tasker.com.tw/*"],
+  "host_permissions": [
+    "http://127.0.0.1:8000/*",
+    "https://tasker-copilot.easy-wh.com/*",
+    "https://www.tasker.com.tw/*"
+  ],
   "background": {
     "service_worker": "src/background/index.js",
     "type": "module"

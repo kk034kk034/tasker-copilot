@@ -5,6 +5,25 @@ import type {
 } from "@tasker-copilot/shared";
 import { apiClient } from "../shared/apiClient";
 
+const DEFAULT_DEV_API_BASE_URL = "http://127.0.0.1:8000";
+const DEFAULT_PROD_API_BASE_URL = "https://api.your-domain.com";
+
+chrome.runtime.onInstalled.addListener(async () => {
+  const isDev = chrome.runtime.getManifest().version_name === "dev";
+  const current = await chrome.storage.local.get(["apiBaseUrl", "apiKey"]);
+  const nextApiBaseUrl =
+    typeof current.apiBaseUrl === "string" && current.apiBaseUrl.trim()
+      ? current.apiBaseUrl
+      : isDev
+        ? DEFAULT_DEV_API_BASE_URL
+        : DEFAULT_PROD_API_BASE_URL;
+
+  await chrome.storage.local.set({
+    apiBaseUrl: nextApiBaseUrl,
+    apiKey: typeof current.apiKey === "string" ? current.apiKey : ""
+  });
+});
+
 async function activeTabId(): Promise<number> {
   const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tabs[0]?.id) {

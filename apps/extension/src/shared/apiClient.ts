@@ -6,13 +6,38 @@ import type {
   UserProfile
 } from "@tasker-copilot/shared";
 
-const API_BASE = "http://127.0.0.1:8000";
+type RuntimeConfig = {
+  apiBaseUrl: string;
+  apiKey: string;
+};
+
+const DEFAULT_DEV_API_BASE_URL = "http://127.0.0.1:8000";
+const DEFAULT_PROD_API_BASE_URL = "https://api.your-domain.com";
+
+function isDevBuild(): boolean {
+  return chrome.runtime.getManifest().version_name === "dev";
+}
+
+async function getRuntimeConfig(): Promise<RuntimeConfig> {
+  const defaults: RuntimeConfig = {
+    apiBaseUrl: isDevBuild() ? DEFAULT_DEV_API_BASE_URL : DEFAULT_PROD_API_BASE_URL,
+    apiKey: ""
+  };
+  const loaded = (await chrome.storage.local.get(["apiBaseUrl", "apiKey"])) as Partial<RuntimeConfig>;
+
+  return {
+    apiBaseUrl: loaded.apiBaseUrl?.trim() || defaults.apiBaseUrl,
+    apiKey: loaded.apiKey?.trim() || defaults.apiKey
+  };
+}
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, {
+  const runtimeConfig = await getRuntimeConfig();
+  const response = await fetch(`${runtimeConfig.apiBaseUrl}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
+      ...(runtimeConfig.apiKey ? { "X-API-Key": runtimeConfig.apiKey } : {}),
       ...(init?.headers ?? {})
     }
   });

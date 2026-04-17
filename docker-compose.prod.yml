@@ -1,0 +1,55 @@
+version: "3.9"
+services:
+  traefik:
+    image: traefik:v3.1
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.le.acme.httpchallenge=true"
+      - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.le.acme.email=${LETSENCRYPT_EMAIL}"
+      - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_letsencrypt:/letsencrypt
+    restart: unless-stopped
+    networks:
+      - backend
+
+  api:
+    build:
+      context: ./apps/api
+    env_file:
+      - .env.prod
+    restart: unless-stopped
+    expose:
+      - "8000"
+    volumes:
+      - api_data:/app/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.tasker-api.rule=Host(`${API_DOMAIN}`)"
+      - "traefik.http.routers.tasker-api.entrypoints=websecure"
+      - "traefik.http.routers.tasker-api.tls.certresolver=le"
+      - "traefik.http.services.tasker-api.loadbalancer.server.port=8000"
+      - "traefik.http.routers.tasker-api.middlewares=tasker-cors,tasker-ratelimit"
+      - "traefik.http.middlewares.tasker-cors.headers.accesscontrolalloworiginlist=${EXTENSION_ORIGIN}"
+      - "traefik.http.middlewares.tasker-cors.headers.accesscontrolallowmethods=GET,POST,PUT,OPTIONS"
+      - "traefik.http.middlewares.tasker-cors.headers.accesscontrolallowheaders=Content-Type,X-API-Key"
+      - "traefik.http.middlewares.tasker-cors.headers.addvaryheader=true"
+      - "traefik.http.middlewares.tasker-ratelimit.ratelimit.average=${RATE_LIMIT_AVERAGE}"
+      - "traefik.http.middlewares.tasker-ratelimit.ratelimit.burst=${RATE_LIMIT_BURST}"
+    networks:
+      - backend
+
+volumes:
+  api_data:
+  traefik_letsencrypt:
+
+networks:
+  backend:

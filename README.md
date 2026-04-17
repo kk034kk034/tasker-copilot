@@ -130,3 +130,15 @@ npm test
 - [ARCHITECTURE.md](./ARCHITECTURE.md)
 - [AGENTS.md](./AGENTS.md)
 - [SECURITY.md](./SECURITY.md)
+- [docs/RELEASE_NAS_CHECKLIST.md](./docs/RELEASE_NAS_CHECKLIST.md)
+
+## External release notes
+- Extension runtime API config is stored in `chrome.storage.local` keys:
+  - `apiBaseUrl`
+  - `apiKey`
+- Default production API URL is `https://api.your-domain.com`.
+- Update `apps/extension/manifest.json` with your real API domain in `host_permissions` before store submission.
+- For NAS deployment, use:
+  - `docker-compose.prod.yml`
+  - `.env.prod` (copied from `.env.prod.example`)
+  - Traefik labels in `docker-compose.prod.yml` (TLS + CORS + rate limit)
